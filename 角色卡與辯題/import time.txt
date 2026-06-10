@@ -1,0 +1,83 @@
+import time
+from enum import Enum
+from typing import List, Dict
+
+# --- 1. 定義辯論階段與動作 ---
+class ActionType(Enum):
+    CONSTRUCTIVE = "申論"        # 建立論點
+    CROSS_EXAMINATION = "質詢"   # 提問與回答
+    REBUTTAL = "結辯"            # 總結與攻防整理
+    MODERATOR = "主持人控場"     # 維持秩序
+
+# 奧勒岡 2v2 賽制流程表 (確保每人都有公平的攻防機會)
+OREGON_2V2_FLOW = [
+    {"stage": "正方一辯申論", "action": ActionType.CONSTRUCTIVE, "speaker": "Pro_1"},
+    {"stage": "反方二辯質詢正方一辯", "action": ActionType.CROSS_EXAMINATION, "attacker": "Con_2", "defender": "Pro_1"},
+    
+    {"stage": "反方一辯申論", "action": ActionType.CONSTRUCTIVE, "speaker": "Con_1"},
+    {"stage": "正方二辯質詢反方一辯", "action": ActionType.CROSS_EXAMINATION, "attacker": "Pro_2", "defender": "Con_1"},
+    
+    {"stage": "正方二辯申論", "action": ActionType.CONSTRUCTIVE, "speaker": "Pro_2"},
+    {"stage": "反方一辯質詢正方二辯", "action": ActionType.CROSS_EXAMINATION, "attacker": "Con_1", "defender": "Pro_2"},
+    
+    {"stage": "反方二辯申論", "action": ActionType.CONSTRUCTIVE, "speaker": "Con_2"},
+    {"stage": "正方一辯質詢反方二辯", "action": ActionType.CROSS_EXAMINATION, "attacker": "Pro_1", "defender": "Con_2"},
+    
+    {"stage": "主持人中場整理", "action": ActionType.MODERATOR, "speaker": "Moderator"},
+    
+    # 結辯通常由一辯擔任
+    {"stage": "反方結辯", "action": ActionType.REBUTTAL, "speaker": "Con_1"},
+    {"stage": "正方結辯", "action": ActionType.REBUTTAL, "speaker": "Pro_1"},
+    
+    {"stage": "主持人最終總結", "action": ActionType.MODERATOR, "speaker": "Moderator"}
+]
+
+# --- 2. 核心系統類別 (與先前邏輯相同，僅變更呼叫的流程表) ---
+class DebateSystem:
+    def __init__(self, topic: str, debaters_config: Dict):
+        self.topic = topic
+        self.history = "" 
+        self.debaters = debaters_config 
+        self.moderator_prompt = "絕對中立，不偏袒任何立場，注重秩序與時間控制..."
+
+    def call_llm(self, role_id: str, prompt_strategy: str) -> str:
+        # 這裡未來放你串接 gemma-4-26b-a4b-it API 的程式碼
+        return f"({role_id} 的模擬發言)"
+
+    def run_match(self):
+        print(f"🏛️ 2v2 辯論開始！命題：【{self.topic}】\n")
+        
+        for step in OREGON_2V2_FLOW: # 替換為 2v2 流程表
+            print(f"=== {step['stage']} ===")
+            
+            if step["action"] == ActionType.CONSTRUCTIVE:
+                self._handle_constructive(step["speaker"])
+                
+            elif step["action"] == ActionType.CROSS_EXAMINATION:
+                self._handle_cross_examination(step["attacker"], step["defender"])
+                
+            elif step["action"] == ActionType.REBUTTAL:
+                self._handle_rebuttal(step["speaker"])
+                
+            elif step["action"] == ActionType.MODERATOR:
+                self._handle_moderator()
+
+            time.sleep(4) 
+            
+        print("🏆 辯論正式結束！")
+
+    # (此處省略 _handle_constructive 等方法的實作，因為邏輯完全與 3v3 版本一致)
+    # ...
+
+# --- 3. 啟動程式 (角色配置減為 4 人) ---
+if __name__ == "__main__":
+    # 2v2 配置：正反雙方各搭配一「理」一「情」
+    config = {
+        "Pro_1": "理性分析者_正方",
+        "Pro_2": "情感主義者_正方",
+        "Con_1": "保守派角色_反方",
+        "Con_2": "激進改革派_反方"
+    }
+    
+    match = DebateSystem(topic="", debaters_config=config)
+    match.run_match()
